@@ -12,11 +12,11 @@ O portal usa Prisma Postgres para que os dados não dependam do computador nem s
 
 1. Crie uma conta em [Prisma Console](https://console.prisma.io/login) e um projeto.
 2. Escolha **Create Database** (Prisma Postgres).
-3. Em **Connection Strings**, gere as duas URLs: **Pooled** e **Direct**.
-4. No Render → **Environment**, configure `DATABASE_URL` com a URL **Pooled** e `DIRECT_URL` com a URL **Direct**.
+3. Em **Connection Strings**, gere ou copie a URL do banco.
+4. No Render → **Environment**, configure somente `DATABASE_URL` com essa URL.
 5. Faça um novo deploy. O comando de build cria as tabelas e o administrador automaticamente.
 
-Use as strings fornecidas pelo Prisma, sem montar endereços manualmente. Ambas usam SSL e funcionam no Render; a URL Direct é usada só para a criação das tabelas.
+Use a string fornecida pelo Prisma, sem montar endereço manualmente. Ela precisa começar com `postgres://` ou `postgresql://`.
 
 ## Vercel
 
