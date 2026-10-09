@@ -58,6 +58,7 @@ model Attachment {
   name String
   path String
   mimeType String
+  content Bytes?
   createdAt DateTime @default(now())
   processId String
   process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
