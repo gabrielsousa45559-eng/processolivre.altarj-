@@ -1,4 +1,16 @@
-# Publicar na Vercel
+# Publicar no Render ou Vercel
+
+## Render
+
+O arquivo `render.yaml` prepara o serviço automaticamente. Ao criar o serviço, informe somente:
+
+- `NEXTAUTH_URL`: a URL final do serviço, por exemplo `https://portal-juridico.onrender.com`;
+- `ADMIN_PASSWORD`: sua senha de administrador;
+- `OPENROUTER_API_KEY`: opcional, necessária apenas para a IA.
+
+O SQLite é adequado apenas para teste: no plano gratuito os dados podem desaparecer após novo deploy ou reinicialização. Para uso permanente, use PostgreSQL.
+
+## Vercel
 
 No projeto da Vercel, abra **Settings → Build and Deployment → Root Directory** e escolha `juridico-processos`. Salve e faça **Redeploy**. Sem isso, a Vercel tenta compilar o bot Discord na raiz e mostra o erro “Could not find any `pages` or `app` directory”.
 

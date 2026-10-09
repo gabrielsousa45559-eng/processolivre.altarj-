@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: portal-juridico-processos
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npx prisma db push && npm run db:seed && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: ADMIN_NAME
+        value: Gabriel Sousa
+      - key: ADMIN_ID
+        value: "742"
+      - key: ADMIN_EMAIL
+        value: gabrielsousa45559@gmail.com
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: meta-llama/llama-3.1-8b-instruct:free
+      - key: CRON_SECRET
+        generateValue: true
