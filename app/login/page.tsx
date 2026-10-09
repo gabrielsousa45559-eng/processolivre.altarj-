@@ -1,7 +1,7 @@
 'use client';
 import { motion } from 'framer-motion'; import { signIn } from 'next-auth/react'; import { useState } from 'react';
 const roles = [
-  ['PROMOTOR', 'Promotor'], ['JUIZ', 'Juiz'], ['DESEMBARGADOR', 'Desembargador'], ['ADVOGADO', 'Advogado de Defesa'], ['VITIMA', 'Vítima']
+  ['PROMOTOR', 'Promotor'], ['JUIZ', 'Juiz'], ['DESEMBARGADOR', 'Desembargador'], ['ADVOGADO', 'Advogado de Defesa'], ['VITIMA', 'Vítima'], ['OFICIAL_JUSTICA', 'Oficial de Justiça']
 ];
 
 export default function Login(){

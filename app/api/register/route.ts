@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { Role, type Role as RoleValue } from '@/lib/constants';
 import { prisma } from '@/lib/prisma';
 
-const allowedRoles = [Role.PROMOTOR, Role.JUIZ, Role.DESEMBARGADOR, Role.ADVOGADO, Role.VITIMA] as const;
+const allowedRoles = [Role.PROMOTOR, Role.JUIZ, Role.DESEMBARGADOR, Role.ADVOGADO, Role.VITIMA, Role.OFICIAL_JUSTICA] as const;
 
 export async function POST(req: Request) {
   const body = await req.json();

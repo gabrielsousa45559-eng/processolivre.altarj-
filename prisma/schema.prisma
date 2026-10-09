@@ -21,6 +21,7 @@ model User {
   actions ProcessAction[]
   messages Message[]
   participations ProcessParticipant[]
+  deliveries Delivery[]
 }
 
 model Process {
@@ -48,6 +49,8 @@ model Process {
   actions ProcessAction[]
   messages Message[]
   participants ProcessParticipant[]
+  parties ProcessParty[]
+  deliveries Delivery[]
 }
 
 model Attachment {
@@ -89,4 +92,25 @@ model ProcessParticipant {
   process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
   @@unique([processId, userId])
+}
+
+model ProcessParty {
+  id String @id @default(cuid())
+  name String
+  identifier String?
+  role String
+  createdAt DateTime @default(now())
+  processId String
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+}
+
+model Delivery {
+  id String @id @default(cuid())
+  documentPath String
+  note String?
+  createdAt DateTime @default(now())
+  processId String
+  userId String
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
 }
