@@ -41,6 +41,9 @@ model Process {
   defenseExtensionDays Int @default(0)
   hearingAt DateTime?
   decisionAt DateTime?
+  officerId String?
+  officerDueAt DateTime?
+  appealDueAt DateTime?
   creatorId String
   assignedToId String?
   creator User @relation("Creator", fields: [creatorId], references: [id])
