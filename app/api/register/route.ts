@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   const role = body.role as RoleValue;
 
   if (name.length < 3 || !numericId || !email.includes('@') || password.length < 8 || !allowedRoles.includes(role as (typeof allowedRoles)[number])) {
-    return NextResponse.json({ error: 'Cadastro público disponível somente para Vítima. Cargos institucionais são criados pela Administração.' }, { status: 400 });
+    return NextResponse.json({ error: 'Cadastro público disponível somente para Cidadão. Cargos institucionais são criados pela Administração.' }, { status: 400 });
   }
 
   try {
