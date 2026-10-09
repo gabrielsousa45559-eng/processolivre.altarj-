@@ -6,7 +6,7 @@ async function main() {
   const name = process.env.ADMIN_NAME || 'Administrador';
   const email = (process.env.ADMIN_EMAIL || 'admin@juridico.local').toLowerCase();
   const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 12);
-  const data = { numericId, name, email, passwordHash, role: Role.ADMIN };
+  const data = { numericId, name, email, passwordHash, role: Role.ADMIN, active: true };
 
   // Mantém a conta definida nas variáveis do Render como administrador,
   // inclusive quando a senha ou o ID forem alterados depois do primeiro deploy.

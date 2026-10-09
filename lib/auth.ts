@@ -23,7 +23,7 @@ export const authOptions: NextAuthOptions = {
       if (!credentials?.numericId || !credentials.password) return null;
       const identifier = credentials.numericId.trim();
       const user = await prisma.user.findFirst({ where: { OR: [{ numericId: identifier }, { email: identifier.toLocaleLowerCase() }] } });
-      if (!user || (user.role !== 'ADMIN' && user.name.toLocaleLowerCase() !== credentials.name?.trim().toLocaleLowerCase())) return null;
+      if (!user || !user.active || (user.role !== 'ADMIN' && user.name.toLocaleLowerCase() !== credentials.name?.trim().toLocaleLowerCase())) return null;
       if (!(await bcrypt.compare(credentials.password, user.passwordHash))) return null;
       return { id: user.id, name: user.name, numericId: user.numericId, role: user.role as Role };
     }
