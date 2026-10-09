@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
       const user = await prisma.user.findFirst({ where: { OR: [{ numericId: identifier }, { email: identifier.toLocaleLowerCase() }] } });
       if (!user || (user.role !== 'ADMIN' && user.name.toLocaleLowerCase() !== credentials.name?.trim().toLocaleLowerCase())) return null;
       if (!(await bcrypt.compare(credentials.password, user.passwordHash))) return null;
-      return { id: user.id, name: user.name, numericId: user.numericId, role: user.role };
+      return { id: user.id, name: user.name, numericId: user.numericId, role: user.role as Role };
     }
   })],
   callbacks: {

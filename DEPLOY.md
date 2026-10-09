@@ -6,4 +6,4 @@ Em **Environment Variables**, configure `DATABASE_URL`, `NEXTAUTH_URL`, `NEXTAUT
 
 Para Vercel, use PostgreSQL (por exemplo, Neon ou Supabase) no `DATABASE_URL`. SQLite e a pasta `public/uploads` servem para teste local/VPS, mas não mantêm dados ou uploads de modo confiável em funções serverless.
 
-O cron de prazos roda a cada hora em `/api/deadlines`.
+No plano Hobby da Vercel, o cron de prazos roda uma vez por dia, às 09:00 UTC, em `/api/deadlines`. Para conferência de prazo de hora em hora, use Vercel Pro ou um agendador externo.
