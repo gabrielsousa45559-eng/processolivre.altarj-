@@ -8,7 +8,15 @@ O arquivo `render.yaml` prepara o serviço automaticamente. Ao criar o serviço,
 - `ADMIN_PASSWORD`: sua senha de administrador;
 - `OPENROUTER_API_KEY`: opcional, necessária apenas para a IA.
 
-O SQLite é adequado apenas para teste: no plano gratuito os dados podem desaparecer após novo deploy ou reinicialização. Para uso permanente, use PostgreSQL.
+O portal usa PostgreSQL externo (Supabase) para que os dados não dependam do computador nem sejam apagados quando o Render reiniciar.
+
+1. Crie um projeto gratuito no [Supabase](https://supabase.com/dashboard).
+2. No projeto, clique em **Connect** e copie a URL **Session pooler** (porta `5432`). O Render é IPv4 e esse modo é o indicado.
+3. Substitua `[YOUR-PASSWORD]` pela senha do banco. Se a senha tiver `@`, `#`, `?`, `&` ou espaço, ela precisa estar codificada em URL.
+4. No Render → **Environment**, crie `DATABASE_URL` e cole a URL completa.
+5. Faça um novo deploy. O comando de build cria as tabelas e o administrador automaticamente.
+
+Use a string fornecida pelo Supabase, sem montar endereço manualmente. O Supabase informa que o pooler em modo de sessão usa porta 5432 e é adequado para ambientes IPv4 como Render.
 
 ## Vercel
 

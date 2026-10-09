@@ -7,7 +7,7 @@ services:
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        value: file:./dev.db
+        sync: false
       - key: NEXTAUTH_SECRET
         generateValue: true
       - key: NEXTAUTH_URL
