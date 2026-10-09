@@ -1,0 +1,3 @@
+import { NextResponse } from 'next/server';
+import { getAuth } from '@/lib/auth'; import { prisma } from '@/lib/prisma'; import { canRead } from '@/lib/access';
+export async function GET(_:Request,{params}:{params:{id:string}}) { const s=await getAuth(); if(!s)return NextResponse.json({error:'Não autorizado'},{status:401}); const p=await prisma.process.findUnique({where:{id:params.id},include:{creator:true,assignedTo:true,attachments:true,participants:{include:{user:true}},actions:{include:{user:true},orderBy:{createdAt:'asc'}},messages:{include:{user:true},orderBy:{createdAt:'asc'}}}}); if(!p||!canRead(p,s))return NextResponse.json({error:'Processo não encontrado'},{status:404}); return NextResponse.json(p); }

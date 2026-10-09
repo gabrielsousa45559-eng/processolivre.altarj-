@@ -1,0 +1,2 @@
+import { NextResponse } from 'next/server'; import { applyExpiredDeadlines } from '@/lib/deadlines';
+export async function GET(req:Request){const secret=new URL(req.url).searchParams.get('secret')||req.headers.get('authorization')?.replace(/^Bearer\s+/i,'');if(process.env.CRON_SECRET&&secret!==process.env.CRON_SECRET)return NextResponse.json({error:'Não autorizado'},{status:401});return NextResponse.json(await applyExpiredDeadlines());}

@@ -1,0 +1,6 @@
+import { ActionType, ProcessStatus } from './constants';
+import { prisma } from './prisma';
+const days=(n:number)=>new Date(Date.now()+n*86_400_000);
+export const judgeDeadline=()=>days(3);
+export const defenseDeadline=(extension=0)=>days(5+extension);
+export async function applyExpiredDeadlines(){const now=new Date();const expiredJudges=await prisma.process.findMany({where:{status:ProcessStatus.AGUARDANDO_JUIZ,judgeDueAt:{lt:now}}});const expiredDefenses=await prisma.process.findMany({where:{status:ProcessStatus.AGUARDANDO_DEFESA,defenseDueAt:{lt:now}}});await prisma.$transaction([...expiredJudges.map(p=>prisma.process.update({where:{id:p.id},data:{status:ProcessStatus.DECISAO,decisionAt:now,actions:{create:{type:ActionType.DECISAO_AUTOMATICA,userId:p.creatorId,note:'Prazo de 3 dias para manifestação judicial encerrado. Encaminhado para decisão administrativa.'}}}})),...expiredDefenses.map(p=>prisma.process.update({where:{id:p.id},data:{status:ProcessStatus.DECISAO,decisionAt:now,actions:{create:{type:ActionType.DECISAO_AUTOMATICA,userId:p.assignedToId||p.creatorId,note:'Defesa não apresentada no prazo. Encaminhado automaticamente para decisão sem audiência presencial.'}}}}))]);return {judge:expiredJudges.length,defense:expiredDefenses.length};}
