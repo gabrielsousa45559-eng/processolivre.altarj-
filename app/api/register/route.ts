@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server';
 import { Role, type Role as RoleValue } from '@/lib/constants';
 import { prisma } from '@/lib/prisma';
 
-const allowedRoles = [Role.PROMOTOR, Role.JUIZ, Role.DESEMBARGADOR, Role.ADVOGADO, Role.VITIMA, Role.OFICIAL_JUSTICA] as const;
+// Cadastro público nunca pode conceder poder institucional.
+const allowedRoles = [Role.VITIMA] as const;
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
   const role = body.role as RoleValue;
 
   if (name.length < 3 || !numericId || !email.includes('@') || password.length < 8 || !allowedRoles.includes(role as (typeof allowedRoles)[number])) {
-    return NextResponse.json({ error: 'Preencha nome, ID, e-mail, cargo e uma senha de pelo menos 8 caracteres.' }, { status: 400 });
+    return NextResponse.json({ error: 'Cadastro público disponível somente para Vítima. Cargos institucionais são criados pela Administração.' }, { status: 400 });
   }
 
   try {
