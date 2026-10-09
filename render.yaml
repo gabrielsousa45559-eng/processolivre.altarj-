@@ -3,10 +3,12 @@ services:
     name: portal-juridico-processos
     runtime: node
     plan: free
-    buildCommand: npm ci && npx prisma db push && npm run db:seed && npm run build
+    buildCommand: npm ci && npm run build
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
         sync: false
       - key: NEXTAUTH_SECRET
         generateValue: true

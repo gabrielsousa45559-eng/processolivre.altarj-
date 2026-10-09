@@ -8,15 +8,15 @@ O arquivo `render.yaml` prepara o serviço automaticamente. Ao criar o serviço,
 - `ADMIN_PASSWORD`: sua senha de administrador;
 - `OPENROUTER_API_KEY`: opcional, necessária apenas para a IA.
 
-O portal usa PostgreSQL externo (Supabase) para que os dados não dependam do computador nem sejam apagados quando o Render reiniciar.
+O portal usa Prisma Postgres para que os dados não dependam do computador nem sejam apagados quando o Render reiniciar.
 
-1. Crie um projeto gratuito no [Supabase](https://supabase.com/dashboard).
-2. No projeto, clique em **Connect** e copie a URL **Session pooler** (porta `5432`). O Render é IPv4 e esse modo é o indicado.
-3. Substitua `[YOUR-PASSWORD]` pela senha do banco. Se a senha tiver `@`, `#`, `?`, `&` ou espaço, ela precisa estar codificada em URL.
-4. No Render → **Environment**, crie `DATABASE_URL` e cole a URL completa.
+1. Crie uma conta em [Prisma Console](https://console.prisma.io/login) e um projeto.
+2. Escolha **Create Database** (Prisma Postgres).
+3. Em **Connection Strings**, gere as duas URLs: **Pooled** e **Direct**.
+4. No Render → **Environment**, configure `DATABASE_URL` com a URL **Pooled** e `DIRECT_URL` com a URL **Direct**.
 5. Faça um novo deploy. O comando de build cria as tabelas e o administrador automaticamente.
 
-Use a string fornecida pelo Supabase, sem montar endereço manualmente. O Supabase informa que o pooler em modo de sessão usa porta 5432 e é adequado para ambientes IPv4 como Render.
+Use as strings fornecidas pelo Prisma, sem montar endereços manualmente. Ambas usam SSL e funcionam no Render; a URL Direct é usada só para a criação das tabelas.
 
 ## Vercel
 
