@@ -23,6 +23,7 @@ model User {
   messages Message[]
   participations ProcessParticipant[]
   deliveries Delivery[]
+  hearingRequests HearingRequest[]
 }
 
 model Process {
@@ -55,6 +56,7 @@ model Process {
   participants ProcessParticipant[]
   parties ProcessParty[]
   deliveries Delivery[]
+  hearingRequests HearingRequest[]
 }
 
 model Attachment {
@@ -120,4 +122,18 @@ model Delivery {
   userId String
   process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
+}
+
+model HearingRequest {
+  id String @id @default(cuid())
+  proposedAt DateTime
+  note String?
+  status String @default("PENDENTE")
+  createdAt DateTime @default(now())
+  decidedAt DateTime?
+  decisionNote String?
+  processId String
+  requesterId String
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+  requester User @relation(fields: [requesterId], references: [id])
 }

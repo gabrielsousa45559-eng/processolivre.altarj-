@@ -53,8 +53,16 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   if (body.action === 'solicitar_segunda') {
-    if (!defenseCanAct) return NextResponse.json({ error: 'Somente a defesa vinculada pode solicitar a 2ª instância.' }, { status: 403 });
-    await prisma.$transaction([prisma.process.update({ where: { id: process.id }, data: { status: ProcessStatus.AGUARDANDO_DESEMBARGADOR, instance: Instance.SEGUNDA, assignedToId: null } }), prisma.processAction.create({ data: { processId: process.id, userId: session.user.id, type: ActionType.ENVIADO_SEGUNDA_INSTANCIA, note: body.note?.trim() || '2ª instância solicitada pela defesa.' } })]);
+    const allowed = defenseCanAct || (session.user.role === Role.PROMOTOR && process.creatorId === session.user.id);
+    if (!allowed) return NextResponse.json({ error: 'Somente a promotoria ou defesa vinculada pode solicitar a 2ª instância.' }, { status: 403 });
+    if (![ProcessStatus.AUTORIZADO, ProcessStatus.NEGADO].includes(process.status as any)) return NextResponse.json({ error: 'A 2ª instância só pode ser solicitada depois da decisão judicial.' }, { status: 400 });
+    try { const content = await uploadedPdf(body.document); await prisma.$transaction([prisma.process.update({ where: { id: process.id }, data: { status: ProcessStatus.AGUARDANDO_DESEMBARGADOR, instance: Instance.SEGUNDA, assignedToId: null } }), prisma.attachment.create({ data: { processId: process.id, name: body.document.name || 'Provas novas para recurso.pdf', stage: 'RECURSO', path: body.document.path, mimeType: 'application/pdf', content } }), prisma.processAction.create({ data: { processId: process.id, userId: session.user.id, type: ActionType.ENVIADO_SEGUNDA_INSTANCIA, note: body.note?.trim() || '2ª instância solicitada com documento de provas novas.' } })]); return NextResponse.json({ ok: true }); } catch (error: any) { return NextResponse.json({ error: error.message }, { status: 400 }); }
+  }
+
+  if (body.action === 'solicitar_remarcacao') {
+    if (!defenseCanAct || process.status !== ProcessStatus.DEFESA_APRESENTADA || !process.hearingAt) return NextResponse.json({ error: 'A defesa só pode solicitar nova data após a audiência ser marcada.' }, { status: 403 });
+    const date = new Date(body.hearingAt); if (Number.isNaN(date.getTime())) return NextResponse.json({ error: 'Informe uma nova data válida.' }, { status: 400 });
+    await prisma.$transaction([prisma.hearingRequest.create({ data: { processId: process.id, requesterId: session.user.id, proposedAt: date, note: String(body.note || '').trim() || null } }), prisma.processAction.create({ data: { processId: process.id, userId: session.user.id, type: ActionType.COMENTARIO, note: `Defesa solicitou nova data de audiência: ${date.toLocaleString('pt-BR')}.` } })]);
     return NextResponse.json({ ok: true });
   }
 
@@ -93,6 +101,21 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const date = new Date(body.hearingAt);
     if (Number.isNaN(date.getTime())) return NextResponse.json({ error: 'Informe uma data válida.' }, { status: 400 });
     await prisma.$transaction([prisma.process.update({ where: { id: process.id }, data: { hearingAt: date } }), prisma.processAction.create({ data: { processId: process.id, userId: session.user.id, type: ActionType.AUDIENCIA_AGENDADA, note: `Audiência agendada para ${date.toLocaleString('pt-BR')}.` } })]);
+    return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === 'adiar_audiencia') {
+    if (process.status !== ProcessStatus.DEFESA_APRESENTADA || !process.hearingAt) return NextResponse.json({ error: 'Não há audiência marcada para adiar.' }, { status: 400 });
+    const date = new Date(body.hearingAt); if (Number.isNaN(date.getTime())) return NextResponse.json({ error: 'Informe uma nova data válida.' }, { status: 400 });
+    await prisma.$transaction([prisma.process.update({ where: { id: process.id }, data: { hearingAt: date } }), prisma.processAction.create({ data: { processId: process.id, userId: session.user.id, type: ActionType.AUDIENCIA_AGENDADA, note: `Audiência adiada para ${date.toLocaleString('pt-BR')}.` } })]);
+    return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === 'decidir_remarcacao') {
+    const request = await prisma.hearingRequest.findFirst({ where: { id: String(body.requestId || ''), processId: process.id, status: 'PENDENTE' } });
+    if (!request) return NextResponse.json({ error: 'Pedido de remarcação não encontrado ou já decidido.' }, { status: 404 });
+    const accept = Boolean(body.accept);
+    await prisma.$transaction([prisma.hearingRequest.update({ where: { id: request.id }, data: { status: accept ? 'ACEITO' : 'NEGADO', decidedAt: new Date(), decisionNote: String(body.note || '').trim() || null } }), ...(accept ? [prisma.process.update({ where: { id: process.id }, data: { hearingAt: request.proposedAt } })] : []), prisma.processAction.create({ data: { processId: process.id, userId: session.user.id, type: ActionType.COMENTARIO, note: accept ? `Pedido de nova data aceito. Audiência remarcada para ${request.proposedAt.toLocaleString('pt-BR')}.` : 'Pedido de nova data de audiência negado.' } })]);
     return NextResponse.json({ ok: true });
   }
 

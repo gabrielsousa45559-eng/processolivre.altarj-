@@ -113,7 +113,7 @@ export default function Detail() {
           {documents.length ? <>
             <div className="flex gap-1 overflow-x-auto border-b border-line bg-[#071426] p-2">
               {documents.map((item: any) => <button key={item.id} onClick={() => setSelectedDocumentId(item.id)} className={activeDocument?.id === item.id ? 'shrink-0 rounded bg-blue-900/70 px-3 py-2 text-xs text-blue-100' : 'shrink-0 rounded px-3 py-2 text-xs text-slate-400 hover:bg-[#10223a]'}>
-                {({ DENUNCIA: 'Denúncia', INSTRUCAO: 'Instrução', INTIMACAO: 'Intimação', DEFESA: 'Defesa', DECISAO: 'Decisão' } as Record<string, string>)[item.stage] || item.name}
+                {({ DENUNCIA: 'Denúncia', INSTRUCAO: 'Instrução', INTIMACAO: 'Intimação', DEFESA: 'Defesa', DECISAO: 'Decisão', RECURSO: 'Recurso / provas novas' } as Record<string, string>)[item.stage] || item.name}
               </button>)}
             </div>
             <div className="flex flex-wrap justify-between gap-3 border-b border-line p-3">

@@ -18,9 +18,11 @@ export async function POST(req: Request) {
   }
 
   try {
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: { numericId, name, passwordHash: await bcrypt.hash(password, 12), role }
     });
+    const parties = await prisma.processParty.findMany({ where: { identifier: numericId, name: { equals: name, mode: 'insensitive' } }, select: { processId: true, role: true } });
+    if (parties.length) await prisma.processParticipant.createMany({ data: parties.map((party) => ({ processId: party.processId, userId: user.id, role: party.role })), skipDuplicates: true });
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error: unknown) {
     if (typeof error === 'object' && error && 'code' in error && error.code === 'P2002') {
