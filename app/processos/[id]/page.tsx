@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Shell } from '@/components/Shell';
 import { Status } from '@/components/Status';
+import { WorkflowPanel } from '@/components/WorkflowPanel';
 
 export default function Detail() {
   const { data: session } = useSession();
@@ -32,7 +33,7 @@ export default function Detail() {
 
   const documents = (process.attachments || []).filter((item: any) => item.mimeType === 'application/pdf');
   const activeDocument = documents.find((item: any) => item.id === selectedDocumentId) || documents.at(-1);
-  const canDecide = ['JUIZ', 'DESEMBARGADOR', 'ADMIN'].includes(session.user.role) && (process.assignedToId === session.user.id || session.user.role === 'ADMIN');
+  const canDecide = process.status === 'DECISAO' && ['JUIZ', 'DESEMBARGADOR', 'ADMIN'].includes(session.user.role) && (process.assignedToId === session.user.id || session.user.role === 'ADMIN');
   const canAddVictim = ['PROMOTOR', 'JUIZ', 'ADMIN'].includes(session.user.role);
   const canAddDefendant = ['OFICIAL_JUSTICA', 'JUIZ', 'ADMIN'].includes(session.user.role);
 
@@ -103,6 +104,7 @@ export default function Detail() {
     {error && <p className="mb-4 rounded border border-red-800 bg-red-950/40 p-3 text-red-200">{error}</p>}
     <div className="grid gap-5 xl:grid-cols-[1fr_280px]">
       <section className="space-y-5">
+        <WorkflowPanel process={process} user={session.user} onUpdated={load} />
         <div className="panel overflow-hidden">
           <div className="border-b border-line p-3">
             <b>Documentos do processo</b>
@@ -110,8 +112,8 @@ export default function Detail() {
           </div>
           {documents.length ? <>
             <div className="flex gap-1 overflow-x-auto border-b border-line bg-[#071426] p-2">
-              {documents.map((item: any, index: number) => <button key={item.id} onClick={() => setSelectedDocumentId(item.id)} className={activeDocument?.id === item.id ? 'shrink-0 rounded bg-blue-900/70 px-3 py-2 text-xs text-blue-100' : 'shrink-0 rounded px-3 py-2 text-xs text-slate-400 hover:bg-[#10223a]'}>
-                {index === 0 ? 'Denúncia' : item.name.length > 34 ? `${item.name.slice(0, 34)}…` : item.name}
+              {documents.map((item: any) => <button key={item.id} onClick={() => setSelectedDocumentId(item.id)} className={activeDocument?.id === item.id ? 'shrink-0 rounded bg-blue-900/70 px-3 py-2 text-xs text-blue-100' : 'shrink-0 rounded px-3 py-2 text-xs text-slate-400 hover:bg-[#10223a]'}>
+                {({ DENUNCIA: 'Denúncia', INSTRUCAO: 'Instrução', INTIMACAO: 'Intimação', DEFESA: 'Defesa', DECISAO: 'Decisão' } as Record<string, string>)[item.stage] || item.name}
               </button>)}
             </div>
             <div className="flex flex-wrap justify-between gap-3 border-b border-line p-3">

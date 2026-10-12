@@ -44,13 +44,12 @@ export function ProcessQuickActions() {
     }
   }
 
-  const nothingToShow = !canAssume && !canAssumeDelivery && !(isResponsibleJudge && process.status === 'EM_ANALISE') && !canExtendDefense;
+  const nothingToShow = !canAssume && !canAssumeDelivery && !canExtendDefense;
   if (nothingToShow) return null;
 
   return <div className="fixed bottom-5 right-5 z-20 flex max-w-md flex-wrap justify-end gap-2">
     {canAssume && <button disabled={busy} className="btn shadow-lg" onClick={() => void action('assumir')}>Assumir processo</button>}
     {canAssumeDelivery && <button disabled={busy} className="btn shadow-lg" onClick={() => void action('assumir_oficial')}>Assumir intimação · 3 dias</button>}
-    {isResponsibleJudge && process.status === 'EM_ANALISE' && <button disabled={busy} className="btn shadow-lg" onClick={() => void action('instrucao')}>Iniciar instrução e intimação</button>}
     {canExtendDefense && <div className="flex items-center gap-1 rounded border border-gold/40 bg-[#071426] p-1 shadow-lg">
       <span className="px-2 text-xs text-gold">Defesa: +{process.defenseExtensionDays || 0}/2 dias</span>
       <button disabled={busy} className="btn-outline px-2 py-1 text-xs" onClick={() => void action('prorrogar', { days: 1 })}>+1 dia</button>

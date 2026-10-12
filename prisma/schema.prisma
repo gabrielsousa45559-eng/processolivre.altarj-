@@ -60,6 +60,7 @@ model Process {
 model Attachment {
   id String @id @default(cuid())
   name String
+  stage String @default("DENUNCIA")
   path String
   mimeType String
   content Bytes?
