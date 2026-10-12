@@ -12,6 +12,7 @@ model User {
   numericId String @unique
   name String
   email String? @unique
+  oab String? @unique
   passwordHash String
   role String
   active Boolean @default(true)
@@ -102,6 +103,7 @@ model ProcessParty {
   id String @id @default(cuid())
   name String
   identifier String?
+  profession String?
   role String
   createdAt DateTime @default(now())
   processId String

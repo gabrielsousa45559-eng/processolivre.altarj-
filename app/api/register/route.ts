@@ -10,17 +10,16 @@ export async function POST(req: Request) {
   const body = await req.json();
   const name = String(body.name ?? '').trim();
   const numericId = String(body.numericId ?? '').trim();
-  const email = String(body.email ?? '').trim().toLowerCase();
   const password = String(body.password ?? '');
   const role = body.role as RoleValue;
 
-  if (name.length < 3 || !numericId || !email.includes('@') || password.length < 8 || !allowedRoles.includes(role as (typeof allowedRoles)[number])) {
-    return NextResponse.json({ error: 'Cadastro público disponível somente para Cidadão. Cargos institucionais são criados pela Administração.' }, { status: 400 });
+  if (name.length < 3 || !numericId || password.length < 8 || !allowedRoles.includes(role as (typeof allowedRoles)[number])) {
+    return NextResponse.json({ error: 'Informe nome completo, ID/passaporte e senha. Cadastro público disponível somente para Cidadão.' }, { status: 400 });
   }
 
   try {
     await prisma.user.create({
-      data: { numericId, name, email, passwordHash: await bcrypt.hash(password, 12), role }
+      data: { numericId, name, passwordHash: await bcrypt.hash(password, 12), role }
     });
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error: unknown) {
