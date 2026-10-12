@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { readFile } from 'fs/promises';
+import path from 'path';
 import { ActionType, Instance, ProcessStatus, Role } from '@/lib/constants';
 import { getAuth } from '@/lib/auth'; import { prisma } from '@/lib/prisma'; import { canAct } from '@/lib/access'; import { defenseDeadline } from '@/lib/deadlines';
 export async function POST(req:Request,{params}:{params:{id:string}}){const s=await getAuth();if(!s)return NextResponse.json({error:'Não autorizado'},{status:401});const b=await req.json();const p=await prisma.process.findUnique({where:{id:params.id},include:{participants:true}});if(!p)return NextResponse.json({error:'Processo não encontrado'},{status:404});
@@ -17,5 +19,6 @@ const name=String(b.actorName||'').trim(),identifier=String(b.actorId||'').trim(
 if(!name||!identifier)return NextResponse.json({error:'Informe seu nome e ID para registrar a decisão.'},{status:400});
 if(!document?.path?.startsWith('/uploads/')||document.mimeType!=='application/pdf')return NextResponse.json({error:'Anexe o documento da decisão em PDF.'},{status:400});
 if(b.action==='devolver'&&!note)return NextResponse.json({error:'Informe o motivo do ajuste solicitado.'},{status:400});
+const filename=path.basename(document.path);if(document.path!==`/uploads/${filename}`)return NextResponse.json({error:'Caminho do documento inválido.'},{status:400});let documentContent:Buffer;try{documentContent=await readFile(path.join(process.cwd(),'public','uploads',filename))}catch{return NextResponse.json({error:'O arquivo enviado não foi encontrado. Envie o PDF novamente.'},{status:400})}
 const record=`Decisão registrada por ${name} (ID ${identifier}).${note?` ${note}`:''}`;
-await prisma.$transaction([prisma.process.update({where:{id:p.id},data:{status:found[0],decisionAt:b.action==='decidir'?new Date():p.decisionAt}}),prisma.attachment.create({data:{processId:p.id,name:document.name||'Documento da decisão.pdf',path:document.path,mimeType:'application/pdf'}}),prisma.processAction.create({data:{processId:p.id,userId:s.user.id,type:found[1],note:record}})]);return NextResponse.json({ok:true});}
+await prisma.$transaction([prisma.process.update({where:{id:p.id},data:{status:found[0],decisionAt:b.action==='decidir'?new Date():p.decisionAt}}),prisma.attachment.create({data:{processId:p.id,name:document.name||'Documento da decisão.pdf',path:document.path,mimeType:'application/pdf',content:documentContent}}),prisma.processAction.create({data:{processId:p.id,userId:s.user.id,type:found[1],note:record}})]);return NextResponse.json({ok:true});}

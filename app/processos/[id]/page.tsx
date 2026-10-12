@@ -122,7 +122,7 @@ export default function Detail() {
           </> : <p className="p-8">Documento não encontrado.</p>}
         </div>
 
-        {(process.creatorId === session.user.id || session.user.role === 'ADMIN') && <div className="panel p-4">
+        {process.creatorId === session.user.id && !process.assignedToId && <div className="panel p-4">
           <b>Atualizar documento da denúncia</b>
           <p className="mb-3 mt-1 text-sm text-slate-400">Disponível somente antes de o processo ser assumido pelo magistrado.</p>
           <input className="block text-sm" type="file" accept="application/pdf" onChange={(event) => event.target.files?.[0] && void replaceDocument(event.target.files[0])} />
