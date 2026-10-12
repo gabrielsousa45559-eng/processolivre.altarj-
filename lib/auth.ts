@@ -18,12 +18,12 @@ export const authOptions: NextAuthOptions = {
   pages: { signIn: '/login' },
   providers: [CredentialsProvider({
     name: 'Acesso jurídico',
-    credentials: { numericId: { label: 'ID/passaporte', type: 'text' }, name: { label: 'Nome', type: 'text' }, password: { label: 'Senha', type: 'password' } },
+    credentials: { numericId: { label: 'E-mail ou ID/passaporte', type: 'text' }, name: { label: 'Nome completo', type: 'text' }, password: { label: 'Senha', type: 'password' } },
     async authorize(credentials) {
       if (!credentials?.numericId || !credentials.password) return null;
       const identifier = credentials.numericId.trim();
-      const user = await prisma.user.findUnique({ where: { numericId: identifier } });
-      if (!user || !user.active || (user.role !== 'ADMIN' && user.name.toLocaleLowerCase() !== credentials.name?.trim().toLocaleLowerCase())) return null;
+      const user = await prisma.user.findFirst({ where: { OR: [{ numericId: identifier }, { email: identifier.toLowerCase() }] } });
+      if (!user || !user.active || !credentials.name?.trim() || user.name.toLocaleLowerCase() !== credentials.name.trim().toLocaleLowerCase()) return null;
       if (!(await bcrypt.compare(credentials.password, user.passwordHash))) return null;
       return { id: user.id, name: user.name, numericId: user.numericId, role: user.role as Role, oab:user.oab||undefined };
     }
