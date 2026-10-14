@@ -34,12 +34,17 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   const session = await getAuth();
   if (!session || !([Role.ADMIN, Role.PROCURADOR_GERAL] as Role[]).includes(session.user.role as Role)) return NextResponse.json({ error: 'Sem acesso' }, { status: 403 });
-  const { id, action } = await req.json();
-  if (!id || !['ativar', 'suspender', 'desativar', 'remover_cargo'].includes(action)) return NextResponse.json({ error: 'Ação inválida.' }, { status: 400 });
+  const { id, action, role } = await req.json();
+  if (!id || !['ativar', 'suspender', 'desativar', 'remover_cargo', 'alterar_cargo'].includes(action)) return NextResponse.json({ error: 'Ação inválida.' }, { status: 400 });
   const target = await prisma.user.findUnique({ where: { id } });
   if (!target || target.id === session.user.id) return NextResponse.json({ error: 'Conta inválida.' }, { status: 400 });
   if (session.user.role === Role.PROCURADOR_GERAL && target.role !== Role.PROMOTOR) return NextResponse.json({ error: 'O Procurador-Geral administra somente contas de Promotor.' }, { status: 403 });
-  const data = action === 'ativar' ? { active: true } : action === 'remover_cargo' ? { active: false, role: Role.VITIMA } : { active: false };
+  if (action === 'alterar_cargo' && (session.user.role !== Role.ADMIN || !Object.values(Role).includes(role))) return NextResponse.json({ error: 'Cargo inválido ou sem autorização.' }, { status: 400 });
+  let data: { active?: boolean; role?: Role; oab?: string } = action === 'ativar' ? { active: true } : action === 'remover_cargo' ? { active: false, role: Role.VITIMA } : { active: false };
+  if (action === 'alterar_cargo') {
+    data = { role };
+    if (role === Role.ADVOGADO && !target.oab) { let oab: string; do { oab = `OAB ${Math.floor(100000 + Math.random() * 900000)}/26`; } while (await prisma.user.findUnique({ where: { oab } })); data.oab = oab; }
+  }
   const user = await prisma.user.update({ where: { id }, data });
   await prisma.auditLog.create({ data: { userId: session.user.id, action: action.toUpperCase(), targetType: 'USUARIO', targetId: target.id, note: `Conta: ${target.name}` } });
   return NextResponse.json(user);
