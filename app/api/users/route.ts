@@ -8,7 +8,7 @@ const promoterFields = { id: true, numericId: true, name: true, role: true, acti
 
 export async function GET() {
   const session = await getAuth();
-  if (!session || ![Role.ADMIN, Role.PROCURADOR_GERAL].includes(session.user.role as Role)) return NextResponse.json({ error: 'Sem acesso' }, { status: 403 });
+  if (!session || !([Role.ADMIN, Role.PROCURADOR_GERAL] as Role[]).includes(session.user.role as Role)) return NextResponse.json({ error: 'Sem acesso' }, { status: 403 });
   const onlyPromoters = session.user.role === Role.PROCURADOR_GERAL;
   return NextResponse.json(await prisma.user.findMany({ where: onlyPromoters ? { role: Role.PROMOTOR } : undefined, select: onlyPromoters ? promoterFields : { ...promoterFields, oab: true }, orderBy: { createdAt: 'desc' } }));
 }
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   const session = await getAuth();
-  if (!session || ![Role.ADMIN, Role.PROCURADOR_GERAL].includes(session.user.role as Role)) return NextResponse.json({ error: 'Sem acesso' }, { status: 403 });
+  if (!session || !([Role.ADMIN, Role.PROCURADOR_GERAL] as Role[]).includes(session.user.role as Role)) return NextResponse.json({ error: 'Sem acesso' }, { status: 403 });
   const { id, action } = await req.json();
   if (!id || !['ativar', 'suspender', 'desativar', 'remover_cargo'].includes(action)) return NextResponse.json({ error: 'Ação inválida.' }, { status: 400 });
   const target = await prisma.user.findUnique({ where: { id } });
