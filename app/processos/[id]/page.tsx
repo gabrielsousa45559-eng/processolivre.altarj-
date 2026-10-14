@@ -34,7 +34,7 @@ export default function Detail() {
   const documents = (process.attachments || []).filter((item: any) => item.mimeType === 'application/pdf');
   const activeDocument = documents.find((item: any) => item.id === selectedDocumentId) || documents.at(-1);
   const canDecide = process.status === 'DECISAO' && ['JUIZ', 'DESEMBARGADOR', 'ADMIN'].includes(session.user.role) && (process.assignedToId === session.user.id || session.user.role === 'ADMIN');
-  const canAddVictim = ['PROMOTOR', 'JUIZ', 'ADMIN'].includes(session.user.role);
+  const canAddVictim = ['PROMOTOR', 'PROCURADOR_GERAL', 'JUIZ', 'ADMIN'].includes(session.user.role);
   const canAddDefendant = ['OFICIAL_JUSTICA', 'JUIZ', 'ADMIN'].includes(session.user.role);
 
   async function uploadDocument(document: File) {

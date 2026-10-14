@@ -53,7 +53,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   if (body.action === 'solicitar_segunda') {
-    const allowed = defenseCanAct || (session.user.role === Role.PROMOTOR && process.creatorId === session.user.id);
+    const allowed = defenseCanAct || ([Role.PROMOTOR, Role.PROCURADOR_GERAL].some((role) => role === session.user.role) && process.creatorId === session.user.id);
     if (!allowed) return NextResponse.json({ error: 'Somente a promotoria ou defesa vinculada pode solicitar a 2ª instância.' }, { status: 403 });
     if (![ProcessStatus.AUTORIZADO, ProcessStatus.NEGADO].includes(process.status as any)) return NextResponse.json({ error: 'A 2ª instância só pode ser solicitada depois da decisão judicial.' }, { status: 400 });
     try { const content = await uploadedPdf(body.document); await prisma.$transaction([prisma.process.update({ where: { id: process.id }, data: { status: ProcessStatus.AGUARDANDO_DESEMBARGADOR, instance: Instance.SEGUNDA, assignedToId: null } }), prisma.attachment.create({ data: { processId: process.id, name: body.document.name || 'Provas novas para recurso.pdf', stage: 'RECURSO', path: body.document.path, mimeType: 'application/pdf', content } }), prisma.processAction.create({ data: { processId: process.id, userId: session.user.id, type: ActionType.ENVIADO_SEGUNDA_INSTANCIA, note: body.note?.trim() || '2ª instância solicitada com documento de provas novas.' } })]); return NextResponse.json({ ok: true }); } catch (error: any) { return NextResponse.json({ error: error.message }, { status: 400 }); }

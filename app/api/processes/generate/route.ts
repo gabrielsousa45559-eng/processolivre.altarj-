@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
   const session = await getAuth();
-  if (!session || (session.user.role !== Role.PROMOTOR && session.user.role !== Role.ADMIN)) return NextResponse.json({ error: 'Sem acesso' }, { status: 403 });
+  if (!session || ![Role.PROMOTOR, Role.PROCURADOR_GERAL, Role.ADMIN].some((role) => role === session.user.role)) return NextResponse.json({ error: 'Sem acesso' }, { status: 403 });
   const body = await req.json();
   if (!body.facts?.trim()) return NextResponse.json({ error: 'Informe os fatos.' }, { status: 400 });
   if (!Array.isArray(body.crimes) || !body.crimes.length) return NextResponse.json({ error: 'Selecione ao menos um crime.' }, { status: 400 });

@@ -20,7 +20,7 @@ export function WorkflowPanel({ process, user, onUpdated }: { process: any; user
   const isJudge = ['JUIZ', 'DESEMBARGADOR', 'ADMIN'].includes(user.role) && process.assignedToId === user.id;
   const isDefense = user.role === 'ADVOGADO' && process.participants?.some((item: any) => item.userId === user.id && item.role === 'ADVOGADO');
   const isOfficer = user.role === 'OFICIAL_JUSTICA' && process.officerId === user.id;
-  const isPromoter = user.role === 'PROMOTOR' && process.creatorId === user.id;
+  const isPromoter = ['PROMOTOR', 'PROCURADOR_GERAL'].includes(user.role) && process.creatorId === user.id;
   const appealAvailable = (isDefense || isPromoter) && ['AUTORIZADO', 'NEGADO'].includes(process.status);
   const completed = new Set((process.attachments || []).map((item: any) => item.stage || 'DENUNCIA'));
   if (process.hearingAt) completed.add('AUDIENCIA');
