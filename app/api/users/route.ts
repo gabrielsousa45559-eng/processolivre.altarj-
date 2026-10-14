@@ -20,7 +20,13 @@ export async function POST(req: Request) {
   if (!body.numericId || !body.name || !body.password || !Object.values(Role).includes(body.role)) return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
   let oab: string | undefined;
   if (body.role === Role.ADVOGADO) { do { oab = `OAB ${Math.floor(100000 + Math.random() * 900000)}/26`; } while (await prisma.user.findUnique({ where: { oab } })); }
-  const user = await prisma.user.create({ data: { numericId: String(body.numericId), name: body.name.trim(), passwordHash: await bcrypt.hash(body.password, 12), role: body.role, oab } });
+  let user;
+  try {
+    user = await prisma.user.create({ data: { numericId: String(body.numericId), name: body.name.trim(), passwordHash: await bcrypt.hash(body.password, 12), role: body.role, oab } });
+  } catch (error: any) {
+    if (error?.code === 'P2002') return NextResponse.json({ error: 'Este ID / passaporte já está cadastrado.' }, { status: 409 });
+    return NextResponse.json({ error: 'Não foi possível salvar o login. Tente novamente.' }, { status: 500 });
+  }
   if (procurador) await prisma.auditLog.create({ data: { userId: session.user.id, action: 'CADASTROU_PROMOTOR', targetType: 'USUARIO', targetId: user.id, note: `Promotor: ${user.name}` } });
   return NextResponse.json(user, { status: 201 });
 }
