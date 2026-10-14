@@ -24,6 +24,7 @@ model User {
   participations ProcessParticipant[]
   deliveries Delivery[]
   hearingRequests HearingRequest[]
+  auditLogs AuditLog[]
 }
 
 model Process {
@@ -136,4 +137,15 @@ model HearingRequest {
   requesterId String
   process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
   requester User @relation(fields: [requesterId], references: [id])
+}
+
+model AuditLog {
+  id String @id @default(cuid())
+  action String
+  targetType String
+  targetId String
+  note String?
+  createdAt DateTime @default(now())
+  userId String
+  user User @relation(fields: [userId], references: [id])
 }

@@ -34,7 +34,7 @@ export default function Detail() {
   const documents = (process.attachments || []).filter((item: any) => item.mimeType === 'application/pdf');
   const activeDocument = documents.find((item: any) => item.id === selectedDocumentId) || documents.at(-1);
   const canDecide = process.status === 'DECISAO' && ['JUIZ', 'DESEMBARGADOR', 'ADMIN'].includes(session.user.role) && (process.assignedToId === session.user.id || session.user.role === 'ADMIN');
-  const canAddVictim = ['PROMOTOR', 'PROCURADOR_GERAL', 'JUIZ', 'ADMIN'].includes(session.user.role);
+  const canAddVictim = (['PROMOTOR', 'PROCURADOR_GERAL'].includes(session.user.role) && process.creatorId === session.user.id) || ['JUIZ', 'ADMIN'].includes(session.user.role);
   const canAddDefendant = ['OFICIAL_JUSTICA', 'JUIZ', 'ADMIN'].includes(session.user.role);
 
   async function uploadDocument(document: File) {
@@ -121,7 +121,7 @@ export default function Detail() {
               <span><a className="mr-3 text-sm text-blue-300" href={activeDocument?.path} target="_blank">Abrir</a><a className="text-sm text-blue-300" href={activeDocument?.path} download>Baixar PDF</a></span>
             </div>
             <iframe key={activeDocument?.id} title="Documento do processo" className="h-[70vh] w-full bg-white" src={activeDocument?.path} />
-          </> : <p className="p-8">Documento não encontrado.</p>}
+          </> : <p className="p-8 text-slate-400">{process.readOnlyPromotoria ? 'Consulta somente-leitura: documentos e provas de processos de outros promotores são restritos.' : 'Documento não encontrado.'}</p>}
         </div>
 
         {process.creatorId === session.user.id && !process.assignedToId && <div className="panel p-4">
